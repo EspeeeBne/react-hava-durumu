@@ -30,60 +30,69 @@ const App = () => {
   const [background, setBackground] = useState("default");
   const [animationData, setAnimationData] = useState(null);
   const [weatherDescription, setWeatherDescription] = useState("");
+  const [latitude, setLatitude] = useState("");
+  const [longitude, setLongitude] = useState("");
 
   const fetchWeather = async () => {
     try {
-      // Get latitude and longitude from city and country
-      const geoResponse = await axios.get(
-        `https://nominatim.openstreetmap.org/search?q=${city},${country}&format=json&limit=1`
-      );
-      if (geoResponse.data.length === 0) {
+      const geoResponse = await axios.post(`${process.env.REACT_APP_API_URL}/api/weather/get-lat-lon`, {
+        city,
+        country,
+      });
+      if (!geoResponse.data) {
         alert("Geçerli bir şehir ve ülke adı girin.");
         return;
       }
 
-      const { lat, lon } = geoResponse.data[0];
+      const { latitude, longitude } = geoResponse.data;
+      setLatitude(latitude);
+      setLongitude(longitude);
 
-      // Get weather data using latitude and longitude
-      const weatherResponse = await axios.get(
-        `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true&temperature_unit=${unit === "C" ? "celsius" : "fahrenheit"}`
-      );
-      setWeatherData(weatherResponse.data.current_weather);
+      const weatherResponse = await axios.post(`${process.env.REACT_APP_API_URL}/api/weather/get-weather`, {
+        latitude: latitude,
+        longitude: longitude,
+        Unit: unit,
+      });
+      setWeatherData(weatherResponse.data);
 
-      // Update background, animation, and description based on weather condition
-      const condition = weatherResponse.data.current_weather.weathercode;
-      if (condition === 0) {
-        setBackground("sunny");
-        setAnimationData(sunnyAnimation);
-        setWeatherDescription("Güneşli");
-      } else if (condition >= 1 && condition <= 3) {
-        setBackground("cloudy");
-        setAnimationData(cloudyAnimation);
-        setWeatherDescription("Bulutlu");
-      } else if (condition >= 45 && condition <= 48) {
-        setBackground("foggy");
-        setAnimationData(foggyAnimation);
-        setWeatherDescription("Sisli");
-      } else if (condition >= 51 && condition <= 67) {
-        setBackground("drizzle");
-        setAnimationData(drizzleAnimation);
-        setWeatherDescription("Çiseleme");
-      } else if (condition >= 71 && condition <= 77) {
-        setBackground("snowy");
-        setAnimationData(snowyAnimation);
-        setWeatherDescription("Karlı");
-      } else if (condition >= 80 && condition <= 82) {
-        setBackground("rainy");
-        setAnimationData(rainyAnimation);
-        setWeatherDescription("Yağmurlu");
-      } else if (condition >= 95 && condition <= 99) {
-        setBackground("thunderstorm");
-        setAnimationData(thunderstormAnimation);
-        setWeatherDescription("Fırtınalı");
+
+      if (weatherResponse.data && weatherResponse.data.weathercode !== undefined) {
+        const condition = weatherResponse.data.weathercode;
+        if (condition === 0) {
+          setBackground("sunny");
+          setAnimationData(sunnyAnimation);
+          setWeatherDescription("Güneşli");
+        } else if (condition >= 1 && condition <= 3) {
+          setBackground("cloudy");
+          setAnimationData(cloudyAnimation);
+          setWeatherDescription("Bulutlu");
+        } else if (condition >= 45 && condition <= 48) {
+          setBackground("foggy");
+          setAnimationData(foggyAnimation);
+          setWeatherDescription("Sisli");
+        } else if (condition >= 51 && condition <= 67) {
+          setBackground("drizzle");
+          setAnimationData(drizzleAnimation);
+          setWeatherDescription("Çiseleme");
+        } else if (condition >= 71 && condition <= 77) {
+          setBackground("snowy");
+          setAnimationData(snowyAnimation);
+          setWeatherDescription("Karlı");
+        } else if (condition >= 80 && condition <= 82) {
+          setBackground("rainy");
+          setAnimationData(rainyAnimation);
+          setWeatherDescription("Yağmurlu");
+        } else if (condition >= 95 && condition <= 99) {
+          setBackground("thunderstorm");
+          setAnimationData(thunderstormAnimation);
+          setWeatherDescription("Fırtınalı");
+        } else {
+          setBackground("default");
+          setAnimationData(null);
+          setWeatherDescription("Bilinmeyen");
+        }
       } else {
-        setBackground("default");
-        setAnimationData(null);
-        setWeatherDescription("Bilinmeyen");
+        alert("Hava durumu bilgisi alınamadı. Lütfen bilgileri kontrol edin.");
       }
     } catch (error) {
       console.error("Error fetching weather data", error);
@@ -165,7 +174,7 @@ const App = () => {
             Hava Durumunu Getir
           </StyledButton>
         </Box>
-        {weatherData && (
+        {weatherData && weatherData.weathercode !== undefined && (
           <WeatherContainer background={background}>
             <WeatherInfo>
               <Typography variant="h5">

@@ -2,38 +2,38 @@ import styled from "@emotion/styled";
 import { TextField, Button, Select } from "@mui/material";
 import { keyframes } from "@emotion/react";
 
-// Animation for rainy background
+
 const rainAnimation = keyframes`
   0% { background-position: 0 0; }
   100% { background-position: 200% 200%; }
 `;
 
-// Animation for snowy background
+
 const snowAnimation = keyframes`
   0% { background-position: 0 0; }
   100% { background-position: 150% 150%; }
 `;
 
-// Animation for thunderstorm background
+
 const thunderstormAnimation = keyframes`
   0%, 100% { background-color: #9e9e9e; }
   50% { background-color: #616161; }
 `;
 
-// Animation for cloudy background
+
 const cloudyAnimation = keyframes`
   0% { background-position: 0 0; }
   100% { background-position: 100% 200%; }
 `;
 
-// Animation for foggy background
+
 const foggyAnimation = keyframes`
   0% { opacity: 0.7; }
   50% { opacity: 1; }
   100% { opacity: 0.7; }
 `;
 
-// Animation for drizzle background
+
 const drizzleAnimation = keyframes`
   0% { background-position: 0 0; }
   100% { background-position: 200% 100%; }
